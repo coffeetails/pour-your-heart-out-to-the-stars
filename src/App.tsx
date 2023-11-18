@@ -3,19 +3,20 @@ import './App.css'
 import anime from 'animejs/lib/anime.es.js';
 
 function App() {
-  const [floatingTextContent, setFloatingTextContent] = createSignal<string[]>([""]);
+  const [floatingTextContent, setFloatingTextContent] = createSignal<string[]>();
   const [textBoxScrollWidth, setTextBoxScrollWidth] = createSignal<number>(0);
 
   let checkScrollWidth = (event) => {
-    let textBoxValue:any = event.target.value;
-    let currentScrollWidth:number = event.target.scrollWidth;
-    if(textBoxValue.length == 1) {
-      setTextBoxScrollWidth(currentScrollWidth);
+    let textBox:any = event.target;
+    
+    if(textBox.value.length == 1) {
+      setTextBoxScrollWidth(textBox.scrollWidth);
     }
-    if(textBoxScrollWidth() != currentScrollWidth) {
+
+    if(textBoxScrollWidth() != textBox.scrollWidth) {
       // Wait untill the word is finished
-      if(textBoxValue[textBoxValue.length-1] == " ") {
-        const words = textBoxValue.split(' ');
+      if(textBox.value[textBox.value.length-1] == " ") {
+        const words = textBox.value.split(' ');
         setFloatingTextContent(words); 
         // The animation will be for each row of words
         anime({
@@ -28,7 +29,7 @@ function App() {
           loop: false,
         });
         
-        event.target.value = "";
+        textBox.value = "";
       }
     }
   }
@@ -36,11 +37,11 @@ function App() {
   return (
     <>
     <header>
-      <p>Pour your heart out to the stars</p>
+      <label for="textbox">Pour your heart out to the stars.</label>
       <button>Read more</button>
     </header>
     <main>
-      <input type="text" id="textbox" name="textbox" oninput={checkScrollWidth} autofocus />
+      <input type="text" id="textbox" name="textbox" oninput={checkScrollWidth} />
       
       <div id="floatingTextWrapper">
         <For each={floatingTextContent()}>
