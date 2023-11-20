@@ -1,48 +1,61 @@
-import { For, createSignal } from 'solid-js'
+import { For, batch, createSignal } from 'solid-js'
 import './App.css'
 import anime from 'animejs/lib/anime.es.js';
 
 function App() {
   const [floatingTextContent, setFloatingTextContent] = createSignal<string[]>();
   const [textBoxScrollWidth, setTextBoxScrollWidth] = createSignal<number>(0);
+  let rowsOfText = 0;
 
   let checkScrollWidth = (event) => {
     let textBox:any = event.target;
     // console.log(event);
-    
+
     if(textBox.value.length == 1) {
       setTextBoxScrollWidth(textBox.scrollWidth);
     }
+    
+    let words:string[] = [];
+    textBox.value.split(' ').forEach((word, i) => {
+      words.push(word);
+    });
+    console.log("words",words);
 
-      // Wait untill the word is finished
-      const words = textBox.value.split(' ');
-      words.forEach(word => {
-        return word;
-      });
-      setFloatingTextContent(words); 
-      
-      if(textBox.value[textBox.value.length-1] == " ") {
-        const wordElems = document.getElementsByClassName("floatingTextWord");
-        const lastWordElem = wordElems[wordElems.length-1];
-        
-        anime({
-          // targets: ["#floatingTextWrapperElem", ".floatingTextWord"],
-          targets: ".floatingTextWord",
-          // targets: wordElems[wordElems.length],
-          duration: 5000,
-          translateY: -270,
-          opacity: 0,
-          rotate:  function() {
-            return anime.random(-100, 100);
-          },
-          easing: 'easeInOutQuad',
-          loop: false,
-        });
-        
-        if(textBoxScrollWidth() != textBox.scrollWidth) {
-          textBox.value = "";
+    setFloatingTextContent(words);
+    
+    if(textBox.value[textBox.value.length-1] == " ") {
+      const wordElems = document.querySelectorAll(".floatingTextWord");
+      const lastWordElem = wordElems[wordElems.length-1];
+
+      anime({
+        // targets: ".floatingTextWord",
+        targets: wordElems,
+        // targets: lastWordElem,
+        duration: 5000,
+        opacity: 0,
+        translateY: -270,
+        // translateX: anime.stagger([-100, 100]),
+        translateX: function() {
+          return anime.random(-50, 50);
+        },
+        rotate: function() {
+          return anime.random(-100, 100);
+        },
+        easing: 'easeInOutQuad',
+        loop: false,
+        update: function(animation) {
+          if(animation.progress == 100) {
+            // console.log(animation);
+          }
         }
+      });
+      
+      if(textBoxScrollWidth() != textBox.scrollWidth) {
+        textBox.value = "";
+        ++rowsOfText;
+        console.log(rowsOfText);
       }
+    }
   }
 
 
