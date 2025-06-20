@@ -1,12 +1,15 @@
-import { For, Index, batch, createSignal } from 'solid-js'
+import { For, Index, batch, createEffect, createMemo, createSignal } from 'solid-js';
+import { Dynamic } from "solid-js/web";
+import { createStore } from "solid-js/store";
 import './App.css'
 import anime from 'animejs/lib/anime.es.js';
 
 function App() {
-  const [floatingTextContent, setFloatingTextContent] = createSignal([[""]]);
+  const [floatingTextContent, setFloatingTextContent] = createSignal([[]]);
+  // const [floatingTextContent, setFloatingTextContent] = createStore([["one", "two", "three"], ["ett", "två", "tre"]]);
   const [textBoxScrollWidth, setTextBoxScrollWidth] = createSignal<number>(0);
   let rowsOfText = 0;
-  let wordBuffer = []; // All words
+  let wordBuffer = [[]]; // All words
   
   let checkScrollWidth = (event) => {
     let words = []; // Words in current row
@@ -23,15 +26,16 @@ function App() {
       words.push(word);
       wordBuffer[rowsOfText] = words;
     });
-    console.log("wordBuffer ",wordBuffer);
-    
-    setFloatingTextContent(wordBuffer); // collects all words written, one array per row
+
+    setFloatingTextContent();
+    setFloatingTextContent(wordBuffer);
     // setFloatingTextContent(words); // collects all words written, one array per row
-    console.log("floatingTextContent()", floatingTextContent()); 
+    console.log("floatingTextContent", floatingTextContent()); 
     
+
     if(textBox.value[textBox.value.length-1] == " ") {
-      const wordElems = document.querySelectorAll(".floatingTextWord");
-      const lastWordElem = wordElems[wordElems.length-1];
+      //const wordElems = document.querySelectorAll(".floatingTextWord");
+      //const lastWordElem = wordElems[wordElems.length-1];
 
       anime({
         targets: ".floatingTextWord",
@@ -58,6 +62,7 @@ function App() {
       
       // Text overflows input, removes text in textfield
       if(textBoxScrollWidth() != textBox.scrollWidth) {
+        
         ++rowsOfText;
         // wordBuffer = newWords;
         // wordBuffer = words;
@@ -65,9 +70,10 @@ function App() {
         textBox.value = "";
       }
     }
+    console.log(floatingTextContent());
   }
 
-
+  
   return (
     <>
     <header>
@@ -77,19 +83,29 @@ function App() {
     <main>
       <input type="text" id="textbox" name="textbox" spellcheck="false" oninput={checkScrollWidth}></input>
       
-        <Index each={floatingTextContent()}>
-          {(firstArray, x) => (
-            <div id="floatingTextWrapper">
-              <Index each={firstArray}>
-                {(word, y) => (
-                  <span class="floatingTextWord">{y} {word}</span>
-                )}
-              </Index>
-            </div>
-          )}
-        </Index>
+      <Index each={floatingTextContent()}>
+        {(firstArray) => (
+          <div id="floatingTextWrapper"> 
+            <Index each={firstArray()}>
+              {(word,i) => (
+                <span class="floatingTextWord">{word()}</span>
+              )}
+            </Index>
+          </div>
+        )}
+      </Index>
 
-      {/* https://docs.solidjs.com/concepts/control-flow/dynamic */}
+      {/*<For each={floatingTextContent()}>
+        {(firstArray) => (
+          <div id="floatingTextWrapper">
+            <For each={firstArray}>
+              {(word) => (
+                <span class="floatingTextWord">{word}</span>
+              )}
+            </For>
+          </div>
+        )}
+      </For>*/}
       
       {/* <div id="floatingTextWrapper">
         <For each={floatingTextContent()[floatingTextContent().length-1]}>
