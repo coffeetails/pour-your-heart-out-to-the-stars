@@ -5,8 +5,9 @@ import './App.css'
 import anime from 'animejs/lib/anime.es.js';
 
 function App() {
-  const [floatingTextContent, setFloatingTextContent] = createSignal([[]]);
-  // const [floatingTextContent, setFloatingTextContent] = createStore([["one", "two", "three"], ["ett", "två", "tre"]]);
+  const [floatingTextContentFirst, setFloatingTextContentFirst] = createSignal([]);
+  const [floatingTextContentSecond, setFloatingTextContentSecond] = createSignal([]);
+  const [floatingTextContentThird, setFloatingTextContentThird] = createSignal([]);
   const [textBoxScrollWidth, setTextBoxScrollWidth] = createSignal<number>(0);
   let rowsOfText = 0;
   let wordBuffer = [[]]; // All words
@@ -14,33 +15,42 @@ function App() {
   let checkScrollWidth = (event) => {
     let words = []; // Words in current row
     let textBox:any = event.target;
-    // console.log(event);
-    //console.log("rowsOfText", rowsOfText);
     
     // Check width of text box on first char entered
     if(textBox.value.length == 1) {
       setTextBoxScrollWidth(textBox.scrollWidth);
     }
 
+    // Push words to a buffer
     textBox.value.split(' ').forEach((word, i) => {
       words.push(word);
-      wordBuffer[rowsOfText] = words;
+      //wordBuffer[rowsOfText] = words;
     });
-
-    setFloatingTextContent();
-    setFloatingTextContent(wordBuffer);
-    // setFloatingTextContent(words); // collects all words written, one array per row
-    console.log("floatingTextContent", floatingTextContent()); 
     
+    if (rowsOfText % 3 == 0) {
+      wordBuffer[0] = words;
+      setFloatingTextContentFirst(wordBuffer[0]);
+      console.log("row 0", floatingTextContentFirst());
+    }
+    if (rowsOfText % 3 == 1) {
+      wordBuffer[1] = words;
+      setFloatingTextContentSecond(wordBuffer[1]);
+      console.log("row 2", floatingTextContentSecond());
+    }
+    if (rowsOfText % 3 == 2) {
+      wordBuffer[2] = words;
+      setFloatingTextContentThird(wordBuffer[2]);
+      console.log("row 3", floatingTextContentThird());
+    }
+    
+    // TODO: Make the animation follow the "row pattern" 0 → 1 → 2 → 0 → 1 → 2 → etc 
 
+    // Start animation after the user presses space
     if(textBox.value[textBox.value.length-1] == " ") {
-      //const wordElems = document.querySelectorAll(".floatingTextWord");
-      //const lastWordElem = wordElems[wordElems.length-1];
-
+      const wordElems = document.querySelectorAll(".floatingTextWord");
+      const lastWordElem = wordElems[wordElems.length-2];
       anime({
-        targets: ".floatingTextWord",
-        // targets: wordElems,
-        // targets: lastWordElem,
+        targets: lastWordElem,
         duration: 5000,
         opacity: 0,
         translateY: -270,
@@ -53,24 +63,15 @@ function App() {
         },
         easing: 'easeInOutQuad',
         loop: false,
-        update: function(animation) {
-          if(animation.progress == 100) {
-            // console.log(animation);
-          }
-        }
+
       });
       
       // Text overflows input, removes text in textfield
       if(textBoxScrollWidth() != textBox.scrollWidth) {
-        
         ++rowsOfText;
-        // wordBuffer = newWords;
-        // wordBuffer = words;
-        // wordBuffer.push([]);
         textBox.value = "";
       }
     }
-    console.log(floatingTextContent());
   }
 
   
@@ -83,37 +84,30 @@ function App() {
     <main>
       <input type="text" id="textbox" name="textbox" spellcheck="false" oninput={checkScrollWidth}></input>
       
-      <Index each={floatingTextContent()}>
-        {(firstArray) => (
-          <div id="floatingTextWrapper"> 
-            <Index each={firstArray()}>
-              {(word,i) => (
-                <span class="floatingTextWord">{word()}</span>
-              )}
-            </Index>
-          </div>
-        )}
-      </Index>
-
-      {/*<For each={floatingTextContent()}>
-        {(firstArray) => (
-          <div id="floatingTextWrapper">
-            <For each={firstArray}>
-              {(word) => (
-                <span class="floatingTextWord">{word}</span>
-              )}
-            </For>
-          </div>
-        )}
-      </For>*/}
-      
-      {/* <div id="floatingTextWrapper">
-        <For each={floatingTextContent()[floatingTextContent().length-1]}>
-          {(word) => (
-            <span class="floatingTextWord">{word}</span>
+      <div id="floatingTextWrapper"> 
+        <Index each={floatingTextContentFirst()}>
+          {(word,i) => (
+            <span class="floatingTextWord">{word()}</span>
           )}
-        </For>
-      </div> */}
+        </Index>
+      </div>
+
+      <div id="floatingTextWrapper"> 
+        <Index each={floatingTextContentSecond()}>
+          {(word,i) => (
+            <span class="floatingTextWord">{word()}</span>
+          )}
+        </Index>
+      </div>
+
+      <div id="floatingTextWrapper"> 
+        <Index each={floatingTextContentThird()}>
+          {(word,i) => (
+            <span class="floatingTextWord">{word()}</span>
+          )}
+        </Index>
+      </div>
+
     </main>
     </>
   )
