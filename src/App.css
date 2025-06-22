@@ -71,14 +71,14 @@ main input:focus-visible {
 }
 
 
-#floatingTextWrapper {
+.floatingTextWrapper {
   position: absolute;
   
   display: flex;
   gap: 0.244rem; /* Simulate a space */
 }
 
-#floatingTextWrapper * {
+.floatingTextWrapper * {
   z-index: 20;
 }
 

@@ -9,6 +9,7 @@ function App() {
   const [floatingTextContentFirst, setFloatingTextContentFirst] = createSignal([]);
   const [floatingTextContentSecond, setFloatingTextContentSecond] = createSignal([]);
   const [floatingTextContentThird, setFloatingTextContentThird] = createSignal([]);
+  const [floatingTextContent, setFloatingTextContent] = createStore([[]]);
   const [textBoxScrollWidth, setTextBoxScrollWidth] = createSignal<number>(0);
   let rowsOfText = 0;
   let wordBuffer = [[]]; // All words
@@ -39,45 +40,23 @@ function App() {
     let lastWordElem;
     
 
-
-    if (rowsOfText % 3 == 0) {
-      wordBuffer[0] = words;
-      setFloatingTextContentFirst(wordBuffer[0]);
-      console.log("row 0", rowsOfText);
-
-      const wordElems = document.querySelectorAll<HTMLElement>(".floatingTextWordFirst");
-      if (wordElems.length == 1 && rowsOfText > 2) {
-        resetFirstWordInRow(wordElems[0]);
-      } else {
-        lastWordElem = wordElems[wordElems.length-2];
-      }
+    wordBuffer[rowsOfText] = words;
+    setFloatingTextContent(wordBuffer);
+    console.log(floatingTextContent);
+    const wordElems = document.querySelectorAll<HTMLElement>(".floatingTextWord");
+    if (wordElems.length == 1 && rowsOfText > 2) {
+      resetFirstWordInRow(wordElems[0]);
+    } else {
     }
+    lastWordElem = wordElems[wordElems.length-2];
 
-    if (rowsOfText % 3 == 1) {
-      wordBuffer[1] = words;
-      setFloatingTextContentSecond(wordBuffer[1]);
-      console.log("row 1", rowsOfText);
-
-      const wordElems = document.querySelectorAll(".floatingTextWordSecond");
-      if (wordElems.length == 1 && rowsOfText > 2) {
-        resetFirstWordInRow(wordElems[0]);
-      } else {
-        lastWordElem = wordElems[wordElems.length-2];
-      }
-    }
-
-    if (rowsOfText % 3 == 2) {
-      wordBuffer[2] = words;
-      setFloatingTextContentThird(wordBuffer[2]);
-      console.log("row 2", rowsOfText);
-
-      const wordElems = document.querySelectorAll(".floatingTextWordThird");
-      if (wordElems.length == 1 && rowsOfText > 2) {
-        resetFirstWordInRow(wordElems[0]);
-      } else {
-        lastWordElem = wordElems[wordElems.length-2];
-      }
-    }
+    // Cleanup words no longer visible
+    wordElems.forEach((row, i) => {
+      //if(wordElem.style.getPropertyValue("opacity") == "0") {
+        //wordElem.remove();
+        //wordElems[i]
+      //}
+    });
 
     // Start animation after the user presses space
     if(textBox.value[textBox.value.length-1] == " " || event.key == "Enter") {
@@ -133,29 +112,17 @@ function App() {
         onkeydown={clearAllText}
       ></input>
       
-      <div id="floatingTextWrapper"> 
-        <Index each={floatingTextContentFirst()}>
-          {(word,i) => (
-            <span class="floatingTextWordFirst" /*style="opacity: 1; transform: translateY(0px) translateX(0px) rotate(0deg);"*/>{word()}</span>
-          )}
-        </Index>
-      </div>
-
-      <div id="floatingTextWrapper"> 
-        <Index each={floatingTextContentSecond()}>
-          {(word,i) => (
-            <span class="floatingTextWordSecond">{word()}</span>
-          )}
-        </Index>
-      </div>
-
-      <div id="floatingTextWrapper"> 
-        <Index each={floatingTextContentThird()}>
-          {(word,i) => (
-            <span class="floatingTextWordThird">{word()}</span>
-          )}
-        </Index>
-      </div>
+      <Index each={floatingTextContent}>
+        {(row, i) => (
+          <div class="floatingTextWrapper">
+            <Index each={row()}>
+              {(word, i) => (
+                <span class="floatingTextWord">{word()}</span>
+              )}
+            </Index>
+          </div>
+        )}
+      </Index>
 
     </main>
     <Show when={showInfo()}>
