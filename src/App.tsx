@@ -38,25 +38,16 @@ function App() {
     });
     
     let lastWordElem;
-    
+
 
     wordBuffer[rowsOfText] = words;
     setFloatingTextContent(wordBuffer);
-    console.log(floatingTextContent);
+    //console.log(floatingTextContent);
     const wordElems = document.querySelectorAll<HTMLElement>(".floatingTextWord");
     if (wordElems.length == 1 && rowsOfText > 2) {
       resetFirstWordInRow(wordElems[0]);
-    } else {
     }
     lastWordElem = wordElems[wordElems.length-2];
-
-    // Cleanup words no longer visible
-    wordElems.forEach((row, i) => {
-      //if(wordElem.style.getPropertyValue("opacity") == "0") {
-        //wordElem.remove();
-        //wordElems[i]
-      //}
-    });
 
     // Start animation after the user presses space
     if(textBox.value[textBox.value.length-1] == " " || event.key == "Enter") {
@@ -95,7 +86,7 @@ function App() {
   return (
     <>
     <header>
-      <label for="textbox">Pour your heart out to the stars.</label>
+      <p>Pour your heart out to the stars.</p>
       <button onClick={() => setShowInfo((prev) => !prev)}>What is this?</button>
     </header>
 
@@ -107,7 +98,6 @@ function App() {
         name="textbox" 
         spellcheck="false" 
         autocomplete="off" 
-        //oninput={updateFloatingText}
         oninput={(event) => updateFloatingText(event)}
         onkeydown={clearAllText}
       ></input>
