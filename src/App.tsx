@@ -4,21 +4,34 @@ import { createStore } from "solid-js/store";
 import './App.css'
 import anime from 'animejs/lib/anime.es.js';
 
+function Word(offset, string) {
+  this.offset = offset; // width of textBox-span (aka. itself)
+  this.string = string; // the string to be displayed
+}
+
+/*
+ div instead of input 
+ - https://stackoverflow.com/a/44303103
+ remove characters after caret
+ - https://stackoverflow.com/a/48166047
+ - https://stackoverflow.com/a/11248187
+*/
+
 function App() {
   const [showInfo, setShowInfo] = createSignal(false);
-  const [floatingTextContentFirst, setFloatingTextContentFirst] = createSignal([]);
-  const [floatingTextContentSecond, setFloatingTextContentSecond] = createSignal([]);
-  const [floatingTextContentThird, setFloatingTextContentThird] = createSignal([]);
   const [floatingTextContent, setFloatingTextContent] = createStore([[]]);
+  const [floatingText, setFloatingText] = createSignal([]);
   const [textBoxScrollWidth, setTextBoxScrollWidth] = createSignal<number>(0);
   let rowsOfText = 0;
   let wordBuffer = [[]]; // All words
-  let textBox;
+  let textBox: HTMLDivElement;
+  let main;
 
   let clearAllText = (event) => {
     if (event.key == "Enter") {
+      event.preventDefault();
       console.log("ENTER");
-      textBox.value += " ";
+      textBox.innerText += " ";
       updateFloatingText(event);
     }
   }
@@ -26,19 +39,27 @@ function App() {
   //let updateFloatingText = (event) => {
   function updateFloatingText(event) {
     let words = []; // Words in current row
+
+    //textBox.setAttribute('size', textBox.value.length*0.65);
     
     // Check width of text box on first char entered
-    if(textBox.value.length == 1) {
-      setTextBoxScrollWidth(textBox.scrollWidth);
+    if(textBox.scrollWidth < 20) {
+      //setTextBoxScrollWidth(textBox.scrollWidth);
+      setTextBoxScrollWidth(main.scrollWidth *0.9);
+      console.log(textBoxScrollWidth());
+      
     }
+    console.log("textBox", textBox.innerText);
 
     // Push words to an array
-    textBox.value.split(' ').forEach((word, i) => {
+    textBox.innerText.split(' ').forEach((word, i) => {
       words.push(word);
     });
     
     let lastWordElem;
 
+    console.log(words);
+    
 
     wordBuffer[rowsOfText] = words;
     setFloatingTextContent(wordBuffer);
@@ -50,7 +71,7 @@ function App() {
     lastWordElem = wordElems[wordElems.length-2];
 
     // Start animation after the user presses space
-    if(textBox.value[textBox.value.length-1] == " " || event.key == "Enter") {
+    if(textBox.innerText[textBox.innerText.length-1] == " " || event.key == "Enter") {
 
       anime({
         targets: lastWordElem,
@@ -70,9 +91,11 @@ function App() {
 
       
       // Text overflows input, removes text in textfield
-      if(textBoxScrollWidth() != textBox.scrollWidth || event.key == "Enter") {
+      if(textBox.scrollWidth > textBoxScrollWidth() || event.key == "Enter") {
+        console.log("new line time");
+        
         ++rowsOfText;
-        textBox.value = "";
+        textBox.innerText = "";
       }
     }
   }
@@ -90,17 +113,16 @@ function App() {
       <button onClick={() => setShowInfo((prev) => !prev)}>What is this?</button>
     </header>
 
-    <main>
-      <input 
+    <main ref={main}>
+      <div 
         ref={textBox}
-        type="text" 
-        id="textbox" 
-        name="textbox" 
+        contenteditable="plaintext-only" 
+        id="textbox"
+        class="forgive-me-father-for-i-have-sinned-🙏" 
         spellcheck="false" 
-        autocomplete="off" 
         oninput={(event) => updateFloatingText(event)}
         onkeydown={clearAllText}
-      ></input>
+      ></div>
       
       <Index each={floatingTextContent}>
         {(row, i) => (
