@@ -12,9 +12,10 @@ function App() {
   let wordBuffer = [[]]; // All words
   let textBox;
 
-  let clearAllText = (event) => {
+  let handleKeyDown = (event) => {
     if (event.key == "Enter") {
       console.log("ENTER");
+      wordBuffer.push([]);
       textBox.value += " ";
       updateFloatingText(event);
     } else if (event.key == "Backspace") {
@@ -31,17 +32,26 @@ function App() {
     if(textBox.value.length == 1) {
       setTextBoxScrollWidth(textBox.scrollWidth);
     }
-
+    
     // Push words to an array
     textBox.value.split(' ').forEach((word, i) => {
       words.push(word);
     });
     
+    
     let lastWordElem;
 
+    let caretPos = document.caretPositionFromPoint(textBox.current.offsetLeft, textBox.current.offsetTop);
+    
+    console.log("caretPos", caretPos);
     console.log("words", words);
     console.log("wordBuffer",wordBuffer[rowsOfText]);
     console.log("backspaced", backspaced());
+    
+    if(backspaced()) {
+
+
+    }
     
     if (words.length >= wordBuffer[rowsOfText].length) {
       wordBuffer[rowsOfText] = words;
@@ -49,7 +59,7 @@ function App() {
       console.log(floatingTextContent[rowsOfText]);
       let lastWord = words[words.length-1]
       let lastWordBuffer = wordBuffer[rowsOfText][wordBuffer[rowsOfText].length-2];
-
+      
       // console.log("wordBuffer",wordBuffer[rowsOfText], lastWordBuffer.length);
       // console.log("words", words, lastWord.length);
       // console.log(lastWord.substring(0, lastWordBuffer.length-2) + " " + lastWord.substring(lastWordBuffer.length-2));
@@ -119,7 +129,7 @@ function App() {
         spellcheck="false" 
         autocomplete="off" 
         oninput={(event) => updateFloatingText(event)}
-        onkeydown={clearAllText}
+        onkeydown={handleKeyDown}
       ></input>
       
       <Index each={floatingTextContent}>
