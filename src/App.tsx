@@ -1,14 +1,11 @@
 import { For, Index, Show, batch, createEffect, createMemo, createSignal } from 'solid-js';
-import { Dynamic } from "solid-js/web";
 import { createStore } from "solid-js/store";
 import './App.css'
 import anime from 'animejs/lib/anime.es.js';
 
 function App() {
   const [showInfo, setShowInfo] = createSignal(false);
-  const [floatingTextContentFirst, setFloatingTextContentFirst] = createSignal([]);
-  const [floatingTextContentSecond, setFloatingTextContentSecond] = createSignal([]);
-  const [floatingTextContentThird, setFloatingTextContentThird] = createSignal([]);
+  const [backspaced, setBackspaced] = createSignal(false);
   const [floatingTextContent, setFloatingTextContent] = createStore([[]]);
   const [textBoxScrollWidth, setTextBoxScrollWidth] = createSignal<number>(0);
   let rowsOfText = 0;
@@ -20,6 +17,9 @@ function App() {
       console.log("ENTER");
       textBox.value += " ";
       updateFloatingText(event);
+    } else if (event.key == "Backspace") {
+      console.log("BACKSPACE");
+      setBackspaced(true);
     }
   }
   
@@ -39,10 +39,30 @@ function App() {
     
     let lastWordElem;
 
+    console.log("words", words);
+    console.log("wordBuffer",wordBuffer[rowsOfText]);
+    console.log("backspaced", backspaced());
+    
+    if (words.length >= wordBuffer[rowsOfText].length) {
+      wordBuffer[rowsOfText] = words;
+    } else if(wordBuffer[rowsOfText].length > 0) {
+      console.log(floatingTextContent[rowsOfText]);
+      let lastWord = words[words.length-1]
+      let lastWordBuffer = wordBuffer[rowsOfText][wordBuffer[rowsOfText].length-2];
 
-    wordBuffer[rowsOfText] = words;
+      // console.log("wordBuffer",wordBuffer[rowsOfText], lastWordBuffer.length);
+      // console.log("words", words, lastWord.length);
+      // console.log(lastWord.substring(0, lastWordBuffer.length-2) + " " + lastWord.substring(lastWordBuffer.length-2));
+      
+      if (lastWord.length > lastWordBuffer.length) {
+        words[words.length-1] = lastWord.substring(0, lastWordBuffer.length-2);
+        words.push(lastWord.substring(lastWordBuffer.length-1));
+        console.log("final words: ", words);
+        wordBuffer[rowsOfText] = words;
+      }
+    }
+    
     setFloatingTextContent(wordBuffer);
-    //console.log(floatingTextContent);
     const wordElems = document.querySelectorAll<HTMLElement>(".floatingTextWord");
     if (wordElems.length == 1 && rowsOfText > 2) {
       resetFirstWordInRow(wordElems[0]);
